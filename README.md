@@ -50,3 +50,13 @@ In Home Assistant:
 
 - If source selection doesn’t seem to work, verify the option name matches exactly (case-sensitive).
 - If the device becomes temporarily unavailable, it usually recovers automatically on the next poll.
+## How to report issues
+
+- Share your amplifier model (for example: H590, H390, etc.).
+- Share your Home Assistant version.
+- Share the integration version from `manifest.json` (`version`).
+- Confirm IP/port setup (do not post public IP; you can mask it), and confirm port `50001`.
+- Provide exact steps to reproduce the issue.
+- Attach logs from `Settings -> System -> Logs`, filtered by `custom_components.hegel` (include 20-50 lines).
+- Confirm whether control works via service calls (`Developer Tools -> Actions`) vs the UI card.
+- Confirm whether any other Hegel control is running in parallel (Node-RED or other TCP clients).
