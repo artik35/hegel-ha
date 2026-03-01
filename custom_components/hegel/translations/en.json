@@ -1,0 +1,19 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Hegel Integrated Amplifier (TCP)",
+                "description": "Connect to Hegel amplifier via TCP.",
+                "data": {
+                    "host": "IP address",
+                    "port": "Port",
+                    "name": "Name",
+                    "model": "Model"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Cannot connect to the device."
+        }
+    }
+}
