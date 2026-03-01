@@ -1,40 +1,52 @@
 # Hegel Integrated Amplifier (TCP)
 
-## Overview
+Home Assistant custom integration for controlling Hegel integrated amplifiers over TCP (port 50001).
 
-Home Assistant custom integration for controlling Hegel integrated amplifiers over TCP.
-Tested on H590; should also work for H95, H120, H190, H390, and H590.
+## Status / Compatibility
+
+- Tested on: **H590**
+- Should also work on: **H95, H120, H190, H390** (same IP control protocol), but not tested by the author.
+
+## Important notes
+
+- **Power OFF in Home Assistant = ECO/Standby on the amplifier.**
+  Hegel units have a physical power button; IP control can only switch ECO/Standby.
+- **State can lag by a few seconds.**
+  Source/power changes may take a short moment to be reflected in Home Assistant.
+- Use at your own risk. This project is provided “as is”, without warranty.
 
 ## Installation
 
+### HACS (Custom repository)
+
+1. Open HACS → Integrations.
+2. Add this repository as a **Custom repository** (category: Integration).
+3. Install **Hegel Integrated Amplifier (TCP)**.
+4. Restart Home Assistant.
+
 ### Manual
 
-1. Copy `custom_components/hegel` into your Home Assistant config directory.
+1. Copy `custom_components/hegel` into your Home Assistant `config/custom_components/`.
 2. Restart Home Assistant.
-
-### HACS Custom Repo
-
-1. Open HACS.
-2. Go to Integrations.
-3. Add this repository as a Custom Repository.
-4. Choose category: Integration.
-5. Install `Hegel Integrated Amplifier (TCP)`.
-6. Restart Home Assistant.
 
 ## Configuration
 
-Use the UI config flow in Home Assistant and provide:
-- host
-- port
-- model
-- name
+In Home Assistant:
+
+1. Settings → Devices & services → Add integration
+2. Search for **Hegel Integrated Amplifier (TCP)**
+3. Provide:
+   - IP address
+   - Port (default: 50001)
+   - Model
+   - Name
 
 ## Entities
 
-- `media_player`
+- `media_player` (basic control: on/off(ECO), volume, mute)
 - `select` (source)
 
-## Notes
+## Troubleshooting
 
-- ECO is treated as pseudo-standby.
-- State may lag by a few seconds.
+- If source selection doesn’t seem to work, verify the option name matches exactly (case-sensitive).
+- If the device becomes temporarily unavailable, it usually recovers automatically on the next poll.
