@@ -3,7 +3,7 @@
     "name": "Hegel Integrated Amplifier (TCP)",
     "codeowners": [],
     "config_flow": true,
-    "documentation": "https://github.com/<USER>/<REPO>",
+    "documentation": "https://github.com/artik35/hegel-ha",
     "integration_type": "device",
     "iot_class": "local_polling",
     "requirements": [],
