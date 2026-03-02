@@ -15,8 +15,6 @@ from .const import (
     DEFAULT_PORT,
     SUPPORTED_MODELS,
     CONF_MODEL,
-    CONF_MODEL_PRESET,
-    DEFAULT_MODEL_PRESET,
     MODEL_PRESETS,
     CONF_POWER_ON_VALUE,
     CONF_POWER_OFF_VALUE,
@@ -29,7 +27,7 @@ from .const import (
 
 
 async def _async_can_connect(hass: HomeAssistant, host: str, port: int) -> bool:
-    """Prosty test połączenia TCP (bez wysyłania komend). Safety-first."""
+    """Simple TCP connection test (no commands sent). Safety-first."""
     try:
         fut = asyncio.open_connection(host, port)
         reader, writer = await asyncio.wait_for(fut, timeout=CONNECT_TIMEOUT)
@@ -59,32 +57,25 @@ class HegelConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not ok:
                 errors["base"] = "cannot_connect"
             else:
-                preset = user_input[CONF_MODEL_PRESET]
+                model = user_input[CONF_MODEL]
 
                 data = {
                     CONF_HOST: host,
                     CONF_PORT: port,
                     CONF_NAME: user_input[CONF_NAME],
-                    CONF_MODEL: user_input[CONF_MODEL],
-                    CONF_MODEL_PRESET: preset,
+                    CONF_MODEL: model,
+                    CONF_SOURCES_MAP: MODEL_PRESETS.get(model, MODEL_PRESETS["H590"]),
                 }
-
-                if preset != "CUSTOM":
-                    data[CONF_SOURCES_MAP] = MODEL_PRESETS[preset]
-                else:
-                    data[CONF_SOURCES_MAP] = MODEL_PRESETS.get(DEFAULT_MODEL_PRESET, {})
 
                 return self.async_create_entry(title=user_input[CONF_NAME], data=data)
 
-        model_preset_choices = list(MODEL_PRESETS.keys()) + ["CUSTOM"]
         schema = vol.Schema(
             {
                 vol.Required(CONF_HOST): str,
                 vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
                 vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
                 vol.Required(CONF_MODEL, default="H590"): vol.In(SUPPORTED_MODELS),
-                vol.Required(CONF_MODEL_PRESET, default=DEFAULT_MODEL_PRESET): vol.In(model_preset_choices),
-                # ECO / pseudo-standby: Twoje działające mapowanie
+                # ECO / pseudo-standby: keep current mapping
             }
         )
 
@@ -111,3 +102,5 @@ class HegelOptionsFlowHandler(config_entries.OptionsFlow):
         )
 
         return self.async_show_form(step_id="init", data_schema=schema)
+
+
