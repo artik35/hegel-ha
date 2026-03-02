@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 DOMAIN = "hegel"
 PLATFORMS = ["media_player", "select"]
@@ -20,7 +20,9 @@ DEFAULT_PORT = 50001
 DEFAULT_NAME = "Hegel"
 
 # Safety-first
-DEFAULT_POLL_SECONDS = 2
+CONF_POLL_INTERVAL = "poll_interval"
+DEFAULT_POLL_INTERVAL = 3
+POLL_INTERVAL_CHOICES = [1, 2, 3, 5]
 MIN_SEND_INTERVAL_MS = 120
 SOCKET_TIMEOUT = 5.0
 CONNECT_TIMEOUT = 3.0

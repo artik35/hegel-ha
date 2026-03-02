@@ -1,10 +1,10 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import logging
 import re
 from datetime import timedelta
-from typing import Any
 
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
@@ -13,7 +13,8 @@ from .const import (
     CMD_MUTE_Q,
     CMD_POWER_Q,
     CMD_VOLUME_Q,
-    DEFAULT_POLL_SECONDS,
+    CONF_POLL_INTERVAL,
+    DEFAULT_POLL_INTERVAL,
 )
 from .hegel_client import HegelTcpClient, HegelState
 
@@ -52,7 +53,8 @@ def _parse_line_into_state(line: str, st: HegelState) -> None:
 
 
 class HegelCoordinator(DataUpdateCoordinator[HegelState]):
-    def __init__(self, hass: HomeAssistant, client: HegelTcpClient, poll_seconds: int | None = None) -> None:
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry, client: HegelTcpClient) -> None:
+        self._entry = entry
         self._client = client
         self._consecutive_failures = 0
 
@@ -60,8 +62,19 @@ class HegelCoordinator(DataUpdateCoordinator[HegelState]):
             hass,
             _LOGGER,
             name="hegel",
-            update_interval=timedelta(seconds=poll_seconds or DEFAULT_POLL_SECONDS),
+            update_interval=timedelta(seconds=self._get_poll_interval_seconds()),
         )
+
+    def _get_poll_interval_seconds(self) -> int:
+        value = self._entry.options.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL)
+        try:
+            poll_interval = int(value)
+        except (TypeError, ValueError):
+            return DEFAULT_POLL_INTERVAL
+        return poll_interval if poll_interval > 0 else DEFAULT_POLL_INTERVAL
+
+    def update_poll_interval(self) -> None:
+        self.update_interval = timedelta(seconds=self._get_poll_interval_seconds())
 
     async def _async_update_data(self) -> HegelState:
         st = HegelState()

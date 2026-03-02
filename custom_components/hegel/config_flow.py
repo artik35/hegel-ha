@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import socket
@@ -7,7 +7,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST, CONF_NAME, CONF_PORT
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 
 from .const import (
     DOMAIN,
@@ -20,6 +20,9 @@ from .const import (
     CONF_POWER_OFF_VALUE,
     CONF_SOURCES_MAP,
     CONNECT_TIMEOUT,
+    CONF_POLL_INTERVAL,
+    DEFAULT_POLL_INTERVAL,
+    POLL_INTERVAL_CHOICES,
 )
 
 
@@ -37,6 +40,11 @@ async def _async_can_connect(hass: HomeAssistant, host: str, port: int) -> bool:
 
 class HegelConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> HegelOptionsFlowHandler:
+        return HegelOptionsFlowHandler(config_entry)
 
     async def async_step_user(self, user_input=None):
         errors: dict[str, str] = {}
@@ -76,3 +84,25 @@ class HegelConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
         return self.async_show_form(step_id="user", data_schema=schema, errors=errors)
+
+
+class HegelOptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        if user_input is not None:
+            return self.async_create_entry(
+                title="",
+                data={CONF_POLL_INTERVAL: user_input[CONF_POLL_INTERVAL]},
+            )
+
+        current = self.config_entry.options.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL)
+
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_POLL_INTERVAL, default=current): vol.In(POLL_INTERVAL_CHOICES),
+            }
+        )
+
+        return self.async_show_form(step_id="init", data_schema=schema)
