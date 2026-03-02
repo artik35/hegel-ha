@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import socket
@@ -14,8 +14,10 @@ from .const import (
     DEFAULT_NAME,
     DEFAULT_PORT,
     SUPPORTED_MODELS,
-    DEFAULT_SOURCES_BY_MODEL,
     CONF_MODEL,
+    CONF_MODEL_PRESET,
+    DEFAULT_MODEL_PRESET,
+    MODEL_PRESETS,
     CONF_POWER_ON_VALUE,
     CONF_POWER_OFF_VALUE,
     CONF_SOURCES_MAP,
@@ -57,28 +59,31 @@ class HegelConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             if not ok:
                 errors["base"] = "cannot_connect"
             else:
-                model = user_input[CONF_MODEL]
-                default_sources = DEFAULT_SOURCES_BY_MODEL.get(model, {})
-
-                # Zapisujemy mapę jako dict[str,str] (kod -> nazwa), bo to stabilne w storage HA.
-                sources_map = {str(k): v for k, v in default_sources.items()}
+                preset = user_input[CONF_MODEL_PRESET]
 
                 data = {
                     CONF_HOST: host,
                     CONF_PORT: port,
                     CONF_NAME: user_input[CONF_NAME],
-                    CONF_MODEL: model,
-                    CONF_SOURCES_MAP: sources_map,
+                    CONF_MODEL: user_input[CONF_MODEL],
+                    CONF_MODEL_PRESET: preset,
                 }
+
+                if preset != "CUSTOM":
+                    data[CONF_SOURCES_MAP] = MODEL_PRESETS[preset]
+                else:
+                    data[CONF_SOURCES_MAP] = MODEL_PRESETS.get(DEFAULT_MODEL_PRESET, {})
 
                 return self.async_create_entry(title=user_input[CONF_NAME], data=data)
 
+        model_preset_choices = list(MODEL_PRESETS.keys()) + ["CUSTOM"]
         schema = vol.Schema(
             {
                 vol.Required(CONF_HOST): str,
                 vol.Required(CONF_PORT, default=DEFAULT_PORT): int,
                 vol.Required(CONF_NAME, default=DEFAULT_NAME): str,
                 vol.Required(CONF_MODEL, default="H590"): vol.In(SUPPORTED_MODELS),
+                vol.Required(CONF_MODEL_PRESET, default=DEFAULT_MODEL_PRESET): vol.In(model_preset_choices),
                 # ECO / pseudo-standby: Twoje działające mapowanie
             }
         )
