@@ -1,4 +1,4 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import asyncio
 import socket
@@ -88,7 +88,7 @@ class HegelConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class HegelOptionsFlowHandler(config_entries.OptionsFlow):
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
-        self.config_entry = config_entry
+        self._entry = config_entry
 
     async def async_step_init(self, user_input=None):
         if user_input is not None:
@@ -97,7 +97,7 @@ class HegelOptionsFlowHandler(config_entries.OptionsFlow):
                 data={CONF_POLL_INTERVAL: user_input[CONF_POLL_INTERVAL]},
             )
 
-        current = self.config_entry.options.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL)
+        current = self._entry.options.get(CONF_POLL_INTERVAL, DEFAULT_POLL_INTERVAL)
 
         schema = vol.Schema(
             {
